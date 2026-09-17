@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vehicle Loan — Functional Test Scenarios (UAT)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+<style>
+  :root{
+    --navy:#0f1b2d; --navy-2:#16273e; --accent:#2f6fed; --accent-2:#5b9dff;
+    --ink:#1c2530; --muted:#5b6b7c; --line:#e4e8ee; --bg:#f5f7fb; --panel:#ffffff;
+    --ok:#1f8a55; --ok-bg:#e6f6ee; --warn:#a5670b; --warn-bg:#fff3dc;
+    --bad:#b3261e; --bad-bg:#fdeceb; --unk:#5b6b7c; --unk-bg:#eef1f5;
+    --shadow: 0 1px 3px rgba(15,27,45,.06), 0 8px 24px rgba(15,27,45,.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:#e7ecf3; --muted:#9fb0c3; --line:#26364c; --bg:#0c1420; --panel:#111d2e;
+      --ok:#57d497; --ok-bg:#0f2a1f; --warn:#ffcf6b; --warn-bg:#2c2308;
+      --bad:#ff8a80; --bad-bg:#301315; --unk:#9fb0c3; --unk-bg:#1a2637;
+    }
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--ink); font-size:15px; line-height:1.6; }
+
+  .hero{ background:linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 55%, #1d3a63 100%); color:#fff; padding:44px 48px 34px; position:relative; overflow:hidden; }
+  .hero::after{ content:""; position:absolute; right:-80px; top:-80px; width:320px; height:320px; border-radius:50%; background:radial-gradient(circle, rgba(91,157,255,.25), transparent 70%); }
+  .hero-eyebrow{ text-transform:uppercase; letter-spacing:.14em; font-size:11.5px; color:#9fc1ff; font-weight:700; margin-bottom:10px; }
+  .hero h1{ margin:0 0 10px; font-size:27px; font-weight:800; letter-spacing:-.01em; }
+  .hero p.sub{ margin:0; color:#c9d7ee; max-width:760px; font-size:14.5px; }
+
+  .stats{ display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; padding:0 48px; margin-top:-26px; position:relative; z-index:2; }
+  .stat-card{ background:var(--panel); border-radius:12px; box-shadow:var(--shadow); padding:16px 18px; border-top:4px solid var(--accent); }
+  .stat-card.p1{ border-top-color:var(--bad); } .stat-card.p2{ border-top-color:var(--warn); } .stat-card.check{ border-top-color:#7a1fa2; }
+  .stat-num{ font-size:26px; font-weight:800; } .stat-label{ font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-top:2px; }
+
+  .wrap{ max-width:1200px; margin:0 auto; padding:34px 48px 90px; }
+  .meta-panel{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px 20px; font-size:13px; color:var(--muted); margin-bottom:22px; box-shadow:var(--shadow); }
+  .meta-panel b{ color:var(--ink); }
+
+  .toolbar{ display:flex; gap:10px; align-items:center; margin-bottom:22px; flex-wrap:wrap; position:sticky; top:0; background:var(--bg); padding:12px 0; z-index:15; }
+  #search{ flex:1 1 280px; padding:10px 14px; border-radius:8px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font-size:13.5px; }
+  .toolbar button{ padding:9px 14px; border-radius:8px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font-size:13px; cursor:pointer; }
+  .toolbar button:hover{ background:var(--unk-bg); }
+  #resultcount{ font-size:12.5px; color:var(--muted); white-space:nowrap; }
+
+  h1{ font-size:20px; margin:0 0 6px; }
+  h2{ font-size:15.5px; margin-top:34px; }
+  details{ background:var(--panel); border:1px solid var(--line); border-radius:12px; margin-bottom:16px; box-shadow:var(--shadow); overflow:hidden; }
+  summary{ cursor:pointer; padding:16px 20px; font-size:15.5px; font-weight:700; list-style:none; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(180deg, var(--panel), var(--bg)); }
+  summary::-webkit-details-marker{ display:none; }
+  summary::after{ content:"\25be"; color:var(--muted); transition:transform .15s ease; }
+  details[open] summary::after{ transform:rotate(180deg); }
+  .count-badge{ font-size:11.5px; font-weight:600; color:var(--muted); background:var(--unk-bg); padding:3px 10px; border-radius:20px; margin-left:10px; }
+
+  table{ border-collapse:separate; border-spacing:0; width:100%; font-size:13px; table-layout:fixed; }
+  th, td{ border-bottom:1px solid var(--line); border-right:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; overflow-wrap:break-word; word-break:break-word; }
+  th:last-child, td:last-child{ border-right:none; }
+  th{ background:var(--navy); color:#fff; font-weight:600; font-size:11.5px; text-transform:uppercase; letter-spacing:.03em; }
+  tr:nth-child(even) td{ background:var(--bg); }
+  tr.hide{ display:none; }
+  tr.flagged td{ background:#fdf6ff !important; }
+  td.id{ font-weight:700; color:var(--accent); white-space:nowrap; }
+
+  table col.c-id{ width:6%; } table col.c-scenario{ width:16%; } table col.c-pre{ width:14%; }
+  table col.c-steps{ width:22%; } table col.c-expected{ width:32%; } table col.c-prio{ width:6%; }
+
+  .prio{ display:inline-block; border-radius:5px; padding:2px 8px; font-weight:700; font-size:11.5px; }
+  .prio-P1{ background:var(--bad-bg); color:var(--bad); }
+  .prio-P2{ background:var(--warn-bg); color:var(--warn); }
+  .prio-P3{ background:var(--unk-bg); color:var(--muted); }
+
+  .flag-badge{ display:inline-block; background:#f0d9ff; color:#7a1fa2; border-radius:5px; padding:1px 7px; font-size:10.5px; font-weight:700; margin-left:6px; vertical-align:1px; }
+
+  #backtotop{ position:fixed; right:26px; bottom:26px; background:var(--accent); color:#fff; border:none; border-radius:50%; width:44px; height:44px; font-size:18px; cursor:pointer; box-shadow:var(--shadow); display:none; z-index:20; }
+
+  @media print{ #backtotop, .toolbar{ display:none !important; } details{ box-shadow:none; } summary{ background:none; } }
+  @media (max-width: 880px){ .stats{ grid-template-columns:repeat(2,1fr); padding:0 20px; } .wrap{ padding:24px 20px 70px; } .hero{ padding:30px 22px; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eyebrow">FINSTA NBFC Multibranch &middot; UAT-Ready Scenario Pack</div>
+  <h1>Vehicle Loan — Functional Test Scenarios (UAT)</h1>
+  <p class="sub">Business-language scenarios for manual QA/UAT execution across the full loan journey — Application, Verification, Approval, Disbursement, Collection, and Reports. No code references, no jargon.</p>
+</div>
+
+<div class="stats">
+  <div class="stat-card"><div class="stat-num" id="stat-total">&mdash;</div><div class="stat-label">Total Scenarios</div></div>
+  <div class="stat-card p1"><div class="stat-num" id="stat-p1">&mdash;</div><div class="stat-label">P1 &mdash; Core Flow</div></div>
+  <div class="stat-card p2"><div class="stat-num" id="stat-p2">&mdash;</div><div class="stat-label">P2 &mdash; Important Edge Cases</div></div>
+  <div class="stat-card check"><div class="stat-num" id="stat-check">&mdash;</div><div class="stat-label">Business Decision Needed</div></div>
+</div>
+
+<div class="wrap">
+<div id="rendered">Loading…</div>
+
+<script id="md-source" type="text/markdown">
+# VEHICLE LOAN — FUNCTIONAL TEST SCENARIOS (UAT)
+
+**Purpose:** A business-language test scenario document for manual QA/UAT execution — no code references, no technical jargon. Each scenario has a Precondition, numbered Steps, an Expected Result, and a Priority. Organized by module in the order a loan actually moves through the business: **Loan Application → Verification → Approval → Disbursement → EMI Collection**, with a short Reports section at the end.
+
+**Note on scope:** This document covers *functional* behavior only — what a business user does and what the system should do in response. It intentionally excludes the technical/security test scenarios (direct API calls, authentication bypass, code-level defects) that were produced separately for the engineering/security backlog. If you need those, they're in the companion Test Case Matrix and QMetry export.
+
+**Priority key:** **P1** = core business flow, must work · **P2** = important validation/edge case · **P3** = nice-to-verify, lower business impact.
+
+---
+
+## MODULE 1: LOAN APPLICATION (VEHICLE LOAN CREATION)
+
+| Scenario ID | Scenario | Precondition | Steps | Expected Result | Priority |
+|---|---|---|---|---|---|
+| LA-01 | Create a new vehicle loan application with valid details | Customer record already exists in the system | 1. Open New Loan Application screen 2. Select "Vehicle Loan" 3. Fill in customer, loan, and vehicle details within allowed limits 4. Click Save | Application is saved successfully and shows status "FI Saved"; a unique application number is generated | P1 |
+| LA-02 | Resume and complete a previously saved (draft) application | A draft application already exists | 1. Open the draft application from the list 2. Complete any remaining tabs 3. Save | Application updates successfully and retains its original application number | P1 |
+| LA-03 | Attempt to save with the loan amount below the allowed minimum | Loan scheme's min/max amount is known | 1. Enter an amount below the scheme's minimum 2. Attempt to save | System shows a warning stating the valid amount range and blocks saving | P1 |
+| LA-04 | Attempt to save with the loan amount above the allowed maximum | same | 1. Enter an amount above the scheme's maximum 2. Attempt to save | System shows the same range warning and blocks saving | P1 |
+| LA-05 | Attempt to save with tenure outside the allowed range | Scheme's tenure range is known | 1. Enter a tenure value outside the allowed range 2. Attempt to save | System warns and blocks saving until a valid tenure is entered | P2 |
+| LA-06 | Attempt to save with an interest rate outside the allowed range | Scheme's interest range is known | 1. Enter a rate outside the allowed range 2. Attempt to save | System warns and blocks saving | P2 |
+| LA-07 | Enter a Loan-to-Value (LTV) percentage above 100% | Vehicle details tab open | 1. Enter LTV greater than 100 | System shows "LTV cannot be more than 100%" and blocks the value | P1 |
+| LA-08 | Enter an LTV of exactly 0 | same | 1. Enter LTV as 0 | System shows "LTV cannot be zero" and blocks the value | P2 |
+| LA-09 | Enter an LTV of exactly 100% | same | 1. Enter LTV as exactly 100 | System accepts the value (100% is the allowed maximum) | P3 |
+| LA-10 | Enter a down payment equal to or greater than the vehicle's value | same | 1. Enter a down payment equal to or exceeding vehicle value | System warns that down payment must be less than the vehicle value and blocks it | P1 |
+| LA-11 | Enter road tax greater than the ex-showroom price (new vehicle only) | New vehicle sub-form | 1. Enter a road tax value greater than the ex-showroom price | System warns and blocks the value | P2 |
+| LA-12 | Leave mandatory loan detail fields blank and attempt to save | Loan Details tab open | 1. Leave Application Date / Amount Requested blank 2. Attempt to save | System highlights the required fields and blocks saving | P1 |
+| LA-13 | Enter a loan amount of zero or a negative value | Loan Details tab open | 1. Enter 0 or a negative amount | System shows "Amount Requested should be greater than zero" | P1 |
+| LA-14 | Change the applicant on an already-saved application | Existing saved application | 1. Open the application 2. Change the applicant to a different customer 3. Save | Application updates successfully; any previously entered KYC/security details tied to the old applicant are cleared and must be re-entered | P2 |
+| LA-15 | Add the same person twice as a co-applicant/surety on one application | Co-applicant/surety tab | 1. Add a person as co-applicant 2. Add the same person again | *Recommended check:* confirm with the business whether the system is expected to warn on this — current behavior does not prevent it, so this should be explicitly tested and a decision made on whether it needs fixing | P2 |
+| LA-16 | Create applications for different vehicle types (2-wheeler / 3-wheeler / 4-wheeler / Other) | Vehicle tab open | 1. Repeat application creation once per vehicle type | Each type is accepted, and vehicle-specific fields display correctly for each | P2 |
+| LA-17 | Create a New Vehicle vs. a Used Vehicle loan | Vehicle tab open | 1. Toggle between New and Used vehicle 2. Fill respective fields | Correct field set is shown for each option, and both save successfully | P2 |
+| LA-18 | Upload supporting documents (vehicle document, insurance) during application | Application in progress | 1. Upload a document in the relevant field 2. Save | Document uploads successfully and is retrievable when reopening the application | P2 |
+| LA-19 | Create an application via the short/mobile lead-capture form | Lead exists | 1. Open the simplified lead-to-loan form 2. Fill required fields 3. Submit | Application is created successfully and appears in the standard application list | P3 |
+
+---
+
+## MODULE 2: VERIFICATION (TELE / FIELD / DOCUMENT)
+
+| Scenario ID | Scenario | Precondition | Steps | Expected Result | Priority |
+|---|---|---|---|---|---|
+| VF-01 | Complete Tele-Verification with all required details | Application exists in "FI Saved" status | 1. Open Tele-Verification 2. Select the verifying executive 3. Enter comments and rating 4. Save | Verification saves successfully; application status advances to "Tele Verification" | P1 |
+| VF-02 | Complete Field/Address Verification with address confirmed | same | 1. Open Field Verification 2. Confirm address 3. Enter comments and rating 4. Save | Status advances to "Field Verification" | P1 |
+| VF-03 | Complete Document Verification | same | 1. Open Document Verification 2. Review application sections 3. Enter comments and rating 4. Save | Status advances to "Document Verification" | P1 |
+| VF-04 | Attempt Tele-Verification without selecting a verifying executive or entering comments | Tele-Verification screen open | 1. Leave required fields blank 2. Attempt to save | System blocks saving until required fields are filled | P1 |
+| VF-05 | Enter a verification date earlier than the verifying executive's joining date | Executive selected | 1. Pick a date before the executive joined | System warns and resets the date | P2 |
+| VF-06 | Complete Field Verification without confirming the address, and without adding an alternate address | Field Verification screen open | 1. Mark address as not confirmed 2. Do not add an alternate address 3. Attempt to save | System requires at least one address entry before saving | P1 |
+| VF-07 | Enter the age of the person met as under 18 | Field Verification screen open | 1. Enter a date of birth resulting in an age under 18 | System blocks the entry as invalid | P2 |
+| VF-08 | Enter the age of the person met as exactly 18 | same | 1. Enter a date of birth resulting in exactly age 18 | System accepts the entry | P3 |
+| VF-09 | Enter more earning family members than the total family size | Field Verification screen open | 1. Enter earning members greater than total family members | System blocks the mismatched entry | P2 |
+| VF-10 | Submit Document Verification without marking any section as reviewed | Document Verification screen open | 1. Enter only comments and rating, do not mark sections 2. Save | *Recommended check with business:* current system allows this to save — confirm whether every section should be required to be marked "Verified" before submission is allowed | P1 |
+| VF-11 | Attempt to open Field or Document Verification before completing Tele-Verification | Tele-Verification incomplete | 1. Try to open Field/Document Verification directly | System should block with a message asking to complete the earlier stage first (confirm this holds for every company/branch configured in the system, not just one) | P2 |
+| VF-12 | Re-verify an application that has already reached "Loan Approved" | Application status = Loan Approved | 1. Open any verification screen for this application 2. Save a new verification entry | System should not move the application backward in status — only the verification date should update | P2 |
+
+---
+
+## MODULE 3: APPROVAL
+
+| Scenario ID | Scenario | Precondition | Steps | Expected Result | Priority |
+|---|---|---|---|---|---|
+| AP-01 | Approve an application as an authorized approver, within the correct amount range | Verification complete; user has approval rights for this loan amount | 1. Open the application from the approval queue 2. Enter approved amount, rate, tenure 3. Click Approve | Status changes to "Loan Approved"; a permanent application number is issued if it was still temporary | P1 |
+| AP-02 | Reject an application | same | 1. Open the application 2. Click Reject, optionally enter a reason | Status changes to "Loan Rejected" | P1 |
+| AP-03 | Approve a loan with a flat interest rate | Loan uses flat interest | 1. Approve the loan | System correctly converts and stores the effective interest rate for the loan | P2 |
+| AP-04 | Attempt to approve with an amount outside the allowed range for that scheme | Approval screen open | 1. Enter an out-of-range approved amount 2. Attempt to approve | System warns and blocks the amount | P1 |
+| AP-05 | Attempt to approve as a user who is not authorized for that loan's amount range | User lacks approval rights for this amount tier | 1. Attempt to click Approve | System blocks with a message that the user is not authorized to approve at this amount level | P1 |
+| AP-06 | Attempt to approve while a required additional sign-off (appraisal) is still pending | Appraisal sign-off incomplete | 1. Attempt to click Approve | System blocks until the required sign-off is completed | P1 |
+| AP-07 | Approve a loan set up for staged disbursement, where the stage percentages do not total 100% | Stage-payment mode selected | 1. Enter stage percentages that don't sum to 100% 2. Attempt to approve | System blocks until percentages total 100% | P2 |
+| AP-08 | Submit an approval/rejection without entering remarks | Approval screen open | 1. Leave the remarks field blank 2. Submit | *Recommended check with business:* remarks currently are not enforced as mandatory at submission despite appearing required on the form — confirm whether remarks should be mandatory | P2 |
+| AP-09 | Attempt to approve/reject the same application twice with the same outcome as a user who already decided on it | User already approved/rejected this application once | 1. Attempt the same action again | System should warn that a decision was already submitted by this user | P2 |
+| AP-10 | Configure the approval amount tiers and authorized approvers (Settings) | Admin access | 1. Open the approval-matrix configuration screen 2. Add/update an amount tier with checker(s) 3. Save | Configuration saves and takes effect for subsequent approvals — *tip: confirm you're using the correct configuration screen; there is more than one similar-looking screen in Settings and only one of them actually persists changes* | P1 |
+
+---
+
+## MODULE 4: DISBURSEMENT
+
+| Scenario ID | Scenario | Precondition | Steps | Expected Result | Priority |
+|---|---|---|---|---|---|
+| DB-01 | Disburse the full sanctioned amount in cash (single payment) | Application is Approved; cash balance sufficient | 1. Open Disbursement for the application 2. Select Single Payment, Cash mode 3. Save | Full amount disbursed; loan status changes to "Disbursed" | P1 |
+| DB-02 | Disburse in multiple tranches | Application is Approved | 1. Select Multiple Disbursement 2. Enter first tranche amount 3. Save; repeat for subsequent tranches | Each tranche is recorded and reflected against the sanctioned amount | P1 |
+| DB-03 | Disburse using staged payments in the correct sequence | Application is Approved | 1. Select Stage Payment 2. Select stages in order 3. Save | Disbursement proceeds per stage in the correct sequence | P2 |
+| DB-04 | Attempt a single-payment disbursement for less than the full sanctioned amount | Single Payment mode | 1. Edit the amount to less than the sanctioned amount 2. Attempt to save | System warns that the full sanctioned amount must be disbursed and resets the value | P1 |
+| DB-05 | Attempt to disburse a zero amount | Disbursement screen open | 1. Enter 0 as the disbursement amount 2. Attempt to save | System blocks with "amount cannot be zero" | P1 |
+| DB-06 | Attempt to disburse more than the amount available to disburse | Disbursement screen open | 1. Enter an amount greater than what remains available 2. Attempt to save | System blocks the excess amount | P1 |
+| DB-07 | Attempt to set a disbursement date earlier than the approval date | Disbursement screen open | 1. Select a date before the approval date | System blocks the invalid date | P2 |
+| DB-08 | Attempt a cash disbursement exceeding the available cash balance | Cash mode | 1. Enter an amount greater than available cash | System blocks with "Insufficient Cash Balance" | P1 |
+| DB-09 | Attempt a direct bank disbursement when no bank details exist for the customer | Bank mode, no bank details on file | 1. Attempt to disburse via bank transfer | System blocks and prompts to add bank details first | P2 |
+| DB-10 | Process a loan Top-Up / Balance Transfer against an existing loan | Customer has an existing eligible loan | 1. Enable Top-Up 2. Click Calculate 3. Select the existing loan to settle 4. Save | Old loan is settled and the new loan proceeds with the adjusted amount | P2 |
+| DB-11 | Attempt disbursement for an application whose approval has since been reversed/changed | Application id where approval was later reverted or superseded | 1. Attempt to open/disburse this application | *Recommended check with business:* confirm the system correctly refuses to disburse in this case — this is a scenario worth explicit sign-off given its financial impact | P1 |
+| DB-12 | Confirm only authorized disbursement staff can access the disbursement screen | Two user accounts: one with disbursement rights, one without | 1. Log in as the unauthorized user 2. Attempt to reach the disbursement entry screen directly (not via the menu) | System should deny access — *this is a high-priority access-control check given the financial impact of this screen* | P1 |
+
+---
+
+## MODULE 5: EMI COLLECTION
+
+| Scenario ID | Scenario | Precondition | Steps | Expected Result | Priority |
+|---|---|---|---|---|---|
+| CL-01 | Collect a regular EMI payment in cash | Disbursed loan with an EMI due | 1. Open the receipt entry screen 2. Enter payment details matching the due amount 3. Save | Receipt is recorded and reflected in the loan's payment history | P1 |
+| CL-02 | Collect a part-payment against the principal | Disbursed loan | 1. Open Part-Payment 2. Enter the part-payment amount 3. Save | Payment is recorded and outstanding balance updates accordingly | P1 |
+| CL-03 | Apply a moratorium (payment holiday) to a loan | Disbursed loan | 1. Open Moratorium 2. Enter the moratorium period 3. Save | Moratorium is applied and reflected in the repayment schedule | P2 |
+| CL-04 | Attempt to collect a part-payment while the loan is already in an active moratorium period | Loan currently in moratorium | 1. Attempt part-payment | System blocks with a message that the loan is already in moratorium | P1 |
+| CL-05 | Attempt to collect a regular EMI while the loan is in an active moratorium period | Loan currently in moratorium | 1. Attempt regular EMI collection (not part-payment) | *Recommended check with business:* confirm whether this should also be blocked — currently the same protection that exists for part-payments does not apply here | P1 |
+| CL-06 | Attempt to submit a receipt where the entered amount doesn't match the total due | Receipt entry screen open | 1. Enter a total that doesn't match the breakdown of installment/interest/charges | System blocks with a mismatch warning | P2 |
+| CL-07 | Attempt to enter a receipt amount of zero | Receipt entry screen open | 1. Enter 0 as the amount | System does not submit the payload | P2 |
+| CL-08 | Collect cash toward a Gold Loan approaching the daily cash-collection limit | Gold loan, cash mode, near daily limit | 1. Attempt to collect an amount that would push the day's total to/above the limit | System shows a warning — *confirm with business whether this should be a hard block rather than a warning that can be bypassed* | P2 |
+| CL-09 | Attempt to collect a payment against a loan that is already fully closed | Loan already closed | 1. Attempt to record a new receipt against this loan | *Recommended check with business:* confirm the system should refuse this — currently the closed status does not prevent a new receipt from being entered | P1 |
+| CL-10 | Cancel/reverse a previously recorded receipt | Valid receipt exists | 1. Open the receipt cancellation screen 2. Look up the receipt 3. Cancel it | Receipt is reversed — *recommended check: confirm with business whether a reason/remarks should be mandatory and whether a second-person approval should be required before this deliverable is signed off, since currently neither is enforced* | P1 |
+| CL-11 | Record a loan recall and subsequent recall receipt | Loan eligible for recall | 1. Create a recall notice 2. Record the recall receipt | Recall is processed and reflected in the loan's status/history | P2 |
+| CL-12 | Confirm a loan reaches full closure once fully repaid | Loan fully repaid through EMIs | 1. Complete all remaining EMI payments | *Recommended check with business:* verify the loan's status correctly reflects closure once fully paid — this is an important sign-off item since the mechanism that marks a loan "closed" was not clearly traceable during the technical review | P1 |
+
+---
+
+## MODULE 6: REPORTS (LIGHT COVERAGE)
+
+| Scenario ID | Scenario | Precondition | Steps | Expected Result | Priority |
+|---|---|---|---|---|---|
+| RP-01 | Generate a Collections summary report for a date range and branch | Collection data exists | 1. Open Collections Report 2. Set date range and branch filter 3. View | Report displays data matching the filters | P2 |
+| RP-02 | Generate a Disbursement summary report for a given month | Disbursed loans exist | 1. Open Disbursement Report 2. Select month 3. View, drill into detail | Summary and drill-down detail display correctly | P2 |
+| RP-03 | Export any report to Excel | Report loaded | 1. Click Export | File downloads and matches the on-screen data | P3 |
+| RP-04 | Confirm the dashboard's summary figures reflect real, current data | Dashboard loaded | 1. Compare dashboard KPI tiles/charts against known current figures | *Recommended check with business:* confirm every chart on the dashboard is showing live data — during the technical review, some chart data could not be confirmed as connected to live figures | P2 |
+| RP-05 | Confirm there is a way to look back at who approved or rejected a given loan, and when | Historical approved/rejected loans exist | 1. Search for a way to view past approval/rejection decisions as a report (not just the live queue) | *Recommended check with business:* confirm whether this reporting need is currently met — no dedicated historical approval/rejection report was found during the technical review | P2 |
+
+---
+
+## MODULE 7: VEHICLE LOAN CONFIGURATION & VEHICLE REPOSSESSION
+
+*(Added in a follow-up pass, covering Vehicle Loan configuration, Showroom master setup, vehicle-specific loan details, and the vehicle seizure/repossession process.)*
+
+| Scenario ID | Scenario | Precondition | Steps | Expected Result | Priority |
+|---|---|---|---|---|---|
+| VC-01 | Set up a new lending scheme for Vehicle Loan | Admin access | 1. Open Loan Product configuration 2. Select Vehicle Loan 3. Enter amount/tenure/interest limits 4. Save | Scheme saves and is immediately usable when creating new Vehicle Loan applications | P1 |
+| VC-02 | Add a new showroom/dealer to the system | Admin access | 1. Open Showroom setup 2. Enter showroom name, address, contact person, bank details 3. Save | Showroom saves and appears in the dropdown when creating a vehicle loan | P1 |
+| VC-03 | Attempt to add the same showroom twice | Showroom already exists | 1. Enter the same showroom name and branch again 2. Save | System blocks the duplicate | P2 |
+| VC-04 | Check whether showroom setup lets you record a dealer commission rate | Showroom setup screen open | 1. Look through the showroom form fields | *Recommended check with business:* confirm whether a commission field is actually needed — it does not currently exist on this form | P2 |
+| VC-05 | Look for a report showing business volume by showroom or by scheme | Showroom/scheme data exists | 1. Search the Reports area for a showroom or scheme filter | *Recommended check with business:* confirm whether this reporting need is currently met — no such filter was found anywhere in Reports during the technical review | P2 |
+| VC-06 | Enter and save vehicle-specific details on a new loan application (new vehicle) | Application in progress | 1. Open the Vehicle Details tab 2. Fill in manufacturer, model, registration, insurance, etc. 3. Save | Details save correctly against the application | P1 |
+| VC-07 | Enter and save vehicle-specific details via the short/mobile lead form | Lead-based application in progress | 1. Fill vehicle details on the simplified form 2. Save | *Recommended check with business:* confirm with the technical team that this save path is fully reliable across all branches — a technical inconsistency was found in how this path saves the data compared to the main application form | P2 |
+| VC-08 | Record that a vehicle has been seized due to non-payment | Loan seriously overdue | 1. Open Vehicle Seized entry 2. Select the loan 3. Enter seizure date, who seized it, and remarks 4. Save | Seizure is recorded | P1 |
+| VC-09 | Confirm the loan's status visibly reflects that its vehicle has been seized | Seizure just recorded (from VC-08) | 1. Check the loan's status after saving the seizure | *Recommended check with business:* confirm where/how this should be reflected — the technical review could not find where the loan's status actually updates as a result of recording a seizure | P1 |
+| VC-10 | Record that a seized vehicle has been released back to the customer | Vehicle previously seized | 1. Open Vehicle Release entry 2. Select the loan 3. Enter release date, who released it, remarks 4. Save | Release is recorded | P1 |
+| VC-11 | Issue the first seizure warning letter (Letter 1) to an overdue customer | Loan seriously overdue, no letter issued yet | 1. Open Seized Letter 1 2. Select the eligible loan(s) 3. Save | Letter is recorded and the loan drops off the "needs Letter 1" list | P1 |
+| VC-12 | Issue the second/final seizure warning letter (Letter 2) | Letter 1 already issued for this loan | 1. Open Seized Letter 2 2. Select the eligible loan (only loans with Letter 1 already issued should appear) 3. Save | Letter 2 is recorded | P1 |
+| VC-13 | Confirm Letter 2 truly cannot be issued before Letter 1 | Loan with no Letter 1 issued | 1. Attempt to issue Letter 2 for this loan (through any means available, not just the normal screen) | *Recommended check with business:* the normal screen won't show this loan, but confirm whether the system should also refuse it if attempted another way — currently it does not | P2 |
+| VC-14 | Issue a Hypothecation Release Letter once a loan is fully repaid | Loan fully closed | 1. Open Hypothecation Release Letter 2. Select the loan 3. Enter the RTA (transport authority) office address 4. Save | Release letter is recorded, freeing the vehicle's hypothecation with the transport authority | P1 |
+| VC-15 | Issue a Delivery Order once a loan is approved | Loan approved, vehicle not yet handed over | 1. Open Delivery Order 2. Select the approved loan 3. Mark as sent | Delivery order is recorded as issued | P1 |
+| VC-16 | Confirm staff understand Delivery Order and Hypothecation Release Letter are two different things, issued at two different points | — | 1. Compare when each document is available (Delivery Order = right after approval; Hypothecation Release = only after full repayment) | Both behave as described and are not interchangeable | P2 |
+| VC-17 | Confirm only authorized staff can access vehicle seizure/release screens | Two accounts: one with rights, one without | 1. Log in as the unauthorized user 2. Attempt to reach any of the seizure/release/letter screens directly (not via the menu) | *Recommended check with business:* this is a high-priority access-control check — during the technical review, none of these six screens were found to have any access restriction beyond the menu itself, including the screens that just list/view records | P1 |
+
+---
+
+## HOW TO USE THIS DOCUMENT
+
+- Work through each module in order, since later modules depend on data created in earlier ones (an application must exist before it can be verified, verified before approved, approved before disbursed, disbursed before EMIs can be collected).
+- Items marked "**Recommended check with business**" are scenarios where the *current* system behavior was found to be permissive (i.e., it does not block something a tester might expect it to block) during a prior technical code review. These are flagged so a business owner can explicitly decide — during UAT — whether that behavior is acceptable as-is or needs to be raised as a defect. They are not assumptions about what's "wrong"; they are decision points for you to close out.
+- Every scenario in this document corresponds to a business rule already confirmed in the underlying technical documentation (functional specifications for Loan Application, Verification, Approval, Disbursement, EMI Collection, and Vehicle Configuration & Repossession) — nothing here is invented; this is simply the same rules translated into a plain-language, UAT-ready format.
+</script>
+
+</div>
+<button id="backtotop" title="Back to top">&uarr;</button>
+
+<script>
+  const raw = document.getElementById('md-source').textContent;
+  marked.setOptions({ gfm: true, breaks: false });
+  const html = marked.parse(raw);
+  const rendered = document.getElementById('rendered');
+  rendered.innerHTML = html;
+
+  // Move the toolbar in right after the intro paragraph (before the first h2)
+  const toolbar = document.createElement('div');
+  toolbar.className = 'toolbar';
+  toolbar.innerHTML = `<input id="search" type="text" placeholder="Filter scenarios by ID, keyword, or priority...">
+    <button id="expandAll">Expand all</button><button id="collapseAll">Collapse all</button>
+    <span id="resultcount"></span>`;
+  const firstH2 = rendered.querySelector('h2');
+  firstH2.parentNode.insertBefore(toolbar, firstH2);
+
+  // Wrap each "MODULE X: ..." <h2> + following <table> into a collapsible <details>
+  const nodes = Array.from(rendered.children);
+  let insertionPoint = null;
+  nodes.forEach(node => {
+    if (node.tagName === 'H2') {
+      const details = document.createElement('details');
+      details.open = true;
+      const summary = document.createElement('summary');
+      summary.textContent = node.textContent;
+      details.appendChild(summary);
+      node.replaceWith(details);
+      insertionPoint = details;
+    } else if (node.tagName === 'TABLE' && insertionPoint) {
+      // Add colgroup for readable column widths (module tables only, 6 cols)
+      const headerCells = node.querySelectorAll('tr:first-child th');
+      if (headerCells.length === 6) {
+        const colgroup = document.createElement('colgroup');
+        ['c-id','c-scenario','c-pre','c-steps','c-expected','c-prio'].forEach(cls => {
+          const col = document.createElement('col');
+          col.className = cls;
+          colgroup.appendChild(col);
+        });
+        node.insertBefore(colgroup, node.firstChild);
+      }
+      insertionPoint.appendChild(node);
+      const rowCount = node.querySelectorAll('tr').length - 1;
+      const badge = document.createElement('span');
+      badge.className = 'count-badge';
+      badge.textContent = rowCount + ' scenarios';
+      insertionPoint.querySelector('summary').appendChild(badge);
+    }
+  });
+
+  // Style priority cells and flag "Recommended check with business" rows
+  let p1 = 0, p2 = 0, p3 = 0, flagged = 0, total = 0;
+  document.querySelectorAll('table tr').forEach((row, idx) => {
+    if (idx === 0 && row.closest('table').rows[0] === row && row.querySelector('th')) return;
+    const cells = row.querySelectorAll('td');
+    if (cells.length < 6) return;
+    total++;
+    const prioCell = cells[5];
+    const prioText = prioCell.textContent.trim();
+    if (prioText === 'P1' || prioText === 'P2' || prioText === 'P3') {
+      prioCell.innerHTML = `<span class="prio prio-${prioText}">${prioText}</span>`;
+      if (prioText === 'P1') p1++; else if (prioText === 'P2') p2++; else p3++;
+    }
+    cells[0].classList.add('id');
+    const expectedCell = cells[4];
+    if (expectedCell.innerHTML.includes('Recommended check')) {
+      row.classList.add('flagged');
+      flagged++;
+      expectedCell.innerHTML = expectedCell.innerHTML.replace('Recommended check with business:', '<span class="flag-badge">DECISION NEEDED</span> Recommended check with business:');
+    }
+  });
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-p1').textContent = p1;
+  document.getElementById('stat-p2').textContent = p2;
+  document.getElementById('stat-check').textContent = flagged;
+
+  document.getElementById('expandAll').addEventListener('click', () => document.querySelectorAll('details').forEach(d => d.open = true));
+  document.getElementById('collapseAll').addEventListener('click', () => document.querySelectorAll('details').forEach(d => d.open = false));
+
+  const searchBox = document.getElementById('search');
+  const resultCount = document.getElementById('resultcount');
+  searchBox.addEventListener('input', () => {
+    const q = searchBox.value.trim().toLowerCase();
+    let visible = 0;
+    document.querySelectorAll('details').forEach(details => {
+      const table = details.querySelector('table');
+      if (!table) return;
+      let sectionHasMatch = false;
+      table.querySelectorAll('tr').forEach((row, idx) => {
+        if (idx === 0) return;
+        const text = row.textContent.toLowerCase();
+        const match = q === '' || text.includes(q);
+        row.classList.toggle('hide', !match);
+        if (match) { visible++; sectionHasMatch = true; }
+      });
+      if (q !== '') details.open = sectionHasMatch;
+    });
+    resultCount.textContent = q === '' ? '' : (visible + ' matching row(s)');
+  });
+
+  window.addEventListener('scroll', () => {
+    document.getElementById('backtotop').style.display = window.scrollY > 600 ? 'block' : 'none';
+  }, { passive: true });
+  document.getElementById('backtotop').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+</body>
+</html>
