@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Loan Lifecycle — Process Flow Document</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+<style>
+  :root{
+    --navy:#0f1b2d; --navy-2:#16273e; --accent:#2f6fed; --accent-2:#5b9dff;
+    --ink:#1c2530; --muted:#5b6b7c; --line:#e4e8ee; --bg:#f5f7fb; --panel:#ffffff;
+    --ok:#1f8a55; --ok-bg:#e6f6ee; --warn:#a5670b; --warn-bg:#fff3dc;
+    --bad:#b3261e; --bad-bg:#fdeceb; --unk:#5b6b7c; --unk-bg:#eef1f5;
+    --code-bg:#eef1f6; --shadow: 0 1px 3px rgba(15,27,45,.06), 0 8px 24px rgba(15,27,45,.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:#e7ecf3; --muted:#9fb0c3; --line:#26364c; --bg:#0c1420; --panel:#111d2e;
+      --ok:#57d497; --ok-bg:#0f2a1f; --warn:#ffcf6b; --warn-bg:#2c2308;
+      --bad:#ff8a80; --bad-bg:#301315; --unk:#9fb0c3; --unk-bg:#1a2637;
+      --code-bg:#182437;
+    }
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  html, body, #toc{ scrollbar-width:none; -ms-overflow-style:none; }
+  html::-webkit-scrollbar, body::-webkit-scrollbar, #toc::-webkit-scrollbar{ display:none; width:0; height:0; }
+  body{margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--ink); font-size:15px; line-height:1.65;}
+
+  .hero{ background:linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 55%, #1d3a63 100%); color:#fff; padding:46px 48px 40px; position:relative; overflow:hidden; }
+  .hero::after{ content:""; position:absolute; right:-80px; top:-80px; width:320px; height:320px; border-radius:50%; background:radial-gradient(circle, rgba(91,157,255,.25), transparent 70%); }
+  .hero-eyebrow{ text-transform:uppercase; letter-spacing:.14em; font-size:11.5px; color:#9fc1ff; font-weight:700; margin-bottom:10px; }
+  .hero h1{ margin:0 0 10px; font-size:28px; font-weight:800; letter-spacing:-.01em; max-width:900px; }
+  .hero p.sub{ margin:0; color:#c9d7ee; max-width:800px; font-size:14.5px; }
+
+  .layout{ display:flex; align-items:flex-start; }
+  #toc{ position:sticky; top:0; height:100vh; overflow-y:auto; width:290px; flex:0 0 290px; background:var(--panel); border-right:1px solid var(--line); padding:18px 16px 40px; }
+  #toc h2{ font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); margin:6px 4px 10px; }
+  #search{ width:100%; padding:9px 12px; margin-bottom:14px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font-size:13px; }
+  #toc-list a{ display:block; text-decoration:none; color:var(--ink); padding:6px 10px; border-radius:6px; font-size:13px; border-left:2px solid transparent; }
+  #toc-list a:hover{ background:var(--unk-bg); }
+  #toc-list a.active{ background:var(--ok-bg); border-left-color:var(--accent); color:var(--accent); font-weight:600; }
+  #toc-list a.h1{ font-weight:800; margin-top:14px; font-size:13.5px; }
+  #toc-list a.h2{ padding-left:18px; color:var(--muted); }
+
+  #content{ flex:1 1 auto; max-width:1080px; margin:0 auto; padding:44px 56px 100px; background:var(--panel); min-height:100vh; }
+  h1{ font-size:22px; border-bottom:3px solid var(--accent); padding-bottom:10px; margin-top:50px; }
+  h1:first-of-type{ margin-top:8px; }
+  h2{ font-size:18px; border-bottom:1px solid var(--line); padding-bottom:7px; margin-top:38px; }
+  table{ border-collapse:separate; border-spacing:0; width:100%; margin:16px 0 22px; font-size:13px; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  th, td{ border-bottom:1px solid var(--line); border-right:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top; }
+  th:last-child, td:last-child{ border-right:none; }
+  tr:last-child td{ border-bottom:none; }
+  th{ background:var(--navy); color:#fff; font-weight:600; font-size:12.5px; text-transform:uppercase; letter-spacing:.03em; }
+  tr:nth-child(even) td{ background:var(--bg); }
+  code{ background:var(--code-bg); padding:2px 6px; border-radius:5px; font-size:.9em; font-family:"SF Mono",Consolas,Menlo,monospace; }
+  a{ color:var(--accent); }
+  hr{ border:none; border-top:1px solid var(--line); margin:34px 0; }
+
+  .mermaid-wrap{ background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px; margin:18px 0 26px; box-shadow:var(--shadow); overflow-x:auto; }
+  .mermaid{ display:flex; justify-content:center; }
+
+  #backtotop{ position:fixed; right:26px; bottom:26px; background:var(--accent); color:#fff; border:none; border-radius:50%; width:44px; height:44px; font-size:18px; cursor:pointer; box-shadow:var(--shadow); display:none; z-index:20; }
+  #progressbar{ position:fixed; top:0; left:0; height:3px; background:var(--accent-2); z-index:30; width:0%; }
+
+  @media print{ #toc, #backtotop, #progressbar{ display:none !important; } #content{ margin:0; max-width:none; padding:0; } .layout{ display:block; } }
+  @media (max-width: 880px){ #toc{ display:none; } #content{ padding:28px 20px; } .hero{ padding:30px 22px; } }
+</style>
+</head>
+<body>
+<div id="progressbar"></div>
+<div class="hero">
+  <div class="hero-eyebrow">FINSTA NBFC Multibranch &middot; Visual Process Documentation</div>
+  <h1>Personal Loan Lifecycle — Process Flow Document</h1>
+  <p class="sub">Creation &rarr; Verification &rarr; Approval &rarr; Disbursement &rarr; Repayment/Collection &rarr; Pre-Closure/NPA, visualized end-to-end with the status state machine and every confirmed access-control or process gap marked directly on the flow.</p>
+</div>
+<div class="layout">
+<div id="toc">
+  <input id="search" type="text" placeholder="Filter sections...">
+  <h2>Contents</h2>
+  <div id="toc-list">Loading...</div>
+</div>
+<div id="content">Loading document…</div>
+</div>
+<button id="backtotop" title="Back to top">&uarr;</button>
+
+<script id="md-source" type="text/markdown">
+# PERSONAL LOAN LIFECYCLE — PROCESS FLOW DOCUMENT
+
+**Application:** FINSTA NBFC Multibranch (Web: Angular / API: ASP.NET Core + PostgreSQL)
+**Purpose:** Visual process flow for the Personal Loan lifecycle — Creation → Verification → Approval → Disbursement → Repayment/Collection → Pre-Closure/NPA — including the status state machine and the access-control/process gaps already documented in the companion functional-documentation set.
+**How to read this:** Every diagram below is built only from evidence already cited (file:line) in the companion documents (`Loan-Creation-Functional-Documentation.md`, `Personal-Loan-All-Forms-Functional-Documentation.md`, `Personal Loan Lifecycle - Complete Functional Documentation.html`, `Personal-Loan-Process-Flow.md`). Steps/transitions marked **⚠ GAP** or **❓ UNKNOWN** are not assumptions — they are confirmed findings from static code review. Diagrams use Mermaid syntax and render inline below.
+
+---
+
+## 1. HIGH-LEVEL END-TO-END PROCESS FLOW
+
+```mermaid
+flowchart TD
+    Start([Customer/Contact exists]) --> Create["1. LOAN CREATION\nNew FI wizard (/shortFi) → SaveNewLoanDetails\nStatus: FI Saved (5), always hardcoded"]
+    Create --> EmpGap["⚠ GAP: Personal Loan's employment/income\nsub-form never renders — orphaned component"]
+    Create --> Approve["2. APPROVAL\nAprovalNewComponent → Saveapprovedapplications\nAmount-slab Checker/Appraiser matrix"]
+    Approve -->|Approve| Approved["Status: Loan Approved (10)"]
+    Approve -->|Reject| Rejected(["Status: Loan Rejected (12) — terminal"])
+    Approved --> Verify{"3. VERIFICATION\n(3 independent sub-stages)\n❓ Structurally happens AFTER Approval\n— status only advances once Approved"}
+    Verify --> Tele["Tele-Verification\nStatus 7"]
+    Verify --> Field["Field/Address Verification\nStatus 8"]
+    Verify --> Doc["Document/FI Verification\nStatus 9"]
+    Tele --> Disburse["4. DISBURSEMENT\nDisbursementNewComponent → SaveLoanDisbursement\nSingle / Multiple / Stage payment"]
+    Field --> Disburse
+    Doc --> Disburse
+    Disburse --> Disbursed["Status: Disbursed (13)"]
+    Disbursed --> Collect["5. REPAYMENT / COLLECTION\nEMI / Part-Payment / Moratorium / Recall"]
+    Collect --> Overdue{"Overdue / NPA?"}
+    Overdue -->|No| Terminal["❓ UNKNOWN: EMI Closed(14) / Full & Final(16) —\nstatus write appears to live inside a Postgres\nfunction, not visible in either repo"]
+    Overdue -->|Yes| NPA["NPA Classification\n(NpaProcess — DPD threshold not traced)"]
+    NPA --> Recall["Loan Recall\n(mandatory legal notice document)"]
+    Collect -->|Early full repayment| PreClose["Pre-Closure\n❓ status write not visible in C#"]
+
+    style Terminal fill:#fdeceb,stroke:#b3261e,color:#b3261e
+    style Rejected fill:#fdeceb,stroke:#b3261e,color:#b3261e
+    style EmpGap fill:#fdeceb,stroke:#b3261e,color:#b3261e
+```
+
+**Reports/Masters** (not a lifecycle stage, but reads/overlays every step above — Scheme Master directly drives Creation's amount/tenure validation, Key Fact Statement reads Approval/Disbursement data) run laterally across the whole flow — see §7.
+
+---
+
+## 2. STAGE 1 — LOAN CREATION, DETAILED FLOW
+
+```mermaid
+flowchart TD
+    U["User navigates to /shortFi\n⚠ GAP: no AuthGuard on this route"] --> Step1["Step 1: Select Contact/Applicant,\nLoan Type = Personal Loan, Loan Name"]
+    Step1 --> Step2["Step 2: Amount, Tenure, ROI,\nInterest Type, Pay-in mode"]
+    Step2 --> V1{"Client-side validation\n(amount/tenure within scheme band,\npart-principal ≤ tenure)"}
+    V1 -->|Fail| Step2
+    V1 -->|Pass| Step3["Step 3: Product-specific sub-form\n⚠ CRITICAL GAP: Personal Loan branch\nis MISSING — new-personal-loan.component\nnever renders; employment/income unreachable"]
+    Step3 --> Step4["Step 4: Preview → Save"]
+    Step4 --> Save["POST SaveNewLoanDetails\n⚠ GAP: zero server-side validation exists\non any field (no data annotations found)"]
+    Save --> Series["FN_GENERATENEXTID\n(TEMPLOANNO / TEMPLOANNOI by loan name)"]
+    Series --> Insert["INSERT tabapplication\nloanstatus='FI Saved', loanstatusid=5 — ALWAYS"]
+    Insert --> Done(["Application created\n→ proceeds to Approval"])
+```
+
+---
+
+## 3. STAGE 2 — APPROVAL, DETAILED FLOW (MAKER/CHECKER)
+
+```mermaid
+sequenceDiagram
+    participant Maker as Maker (Loan Officer)
+    participant Queue as AprovalView
+    participant Screen as AprovalNew ⚠ route-guard status unconfirmed
+    participant Matrix as GetLoanwiseApprovalMatrix (real, wired)
+    participant Mock as RoleWiseApprovalMatrixComponent ⚠ MOCK, does not persist
+    participant API as Saveapprovedapplications
+    participant DB as tabapplication
+
+    Maker->>Queue: Open "New" tab (status=NotApproved)
+    Queue->>Screen: Navigate
+    Screen->>Matrix: CheckAppraiserRequirement() — resolve amount slab
+    Note over Mock: An admin configuring "LoanApprovalMatrix"\nsees "Saved successfully (mock)" — nothing persists.\nThe REAL matrix data comes from Matrix, a\ndifferent already-wired source entirely.
+    Matrix-->>Screen: Checker/Appraiser requirement for matched slab
+    Note over Screen: ⚠ CRITICAL GAP: no code compares the\napplication's creator against the logged-in\napprover — a maker CAN approve their own application
+    Maker->>Screen: Enter approved terms, click Approve/Reject
+    Screen->>API: POST Saveapprovedapplications
+    Note over API: ⚠ CRITICAL GAP: server hardcodes\nApprovestatus="Approved" — the real approver-\neligibility lookup is commented out (dead code).\nNO server-side re-validation of slab/checker/appraiser occurs.
+    alt Approve
+        API->>DB: loanstatus='Loan Approved', loanstatusid=10
+    else Reject
+        API->>DB: loanstatus='Loan Rejected', loanstatusid=12, rejectremarks
+    end
+    Note over API: "Loan Accepted" (loanstatusid=11) is\n⚠ DEAD CODE — unreachable given the hardcoded status above
+    Note over API: EMKAY + Personal Loan + Daily pay-in\napproval triggers createVa() — a narrow,\ncompany-specific carve-out, not a general rule
+```
+
+---
+
+## 4. STAGE 3 — VERIFICATION, DETAILED FLOW
+
+```mermaid
+flowchart TD
+    Q["VerificationView queue"] --> Seq{"pstatus sequencing gate\n(enforced ONLY in this parent grid)"}
+    Seq -->|earlier stage incomplete| Block(["Blocked: complete earlier stage first"])
+    Seq -->|OK| Nav["Navigate to entry screen\n⚠ GAP: no AuthGuard confirmed on\nTele/Field/Document Verification sub-screens"]
+    Nav --> Tele["Tele-Verification:\nExecutive + comments required"]
+    Nav --> Field["Field Verification:\ncomments+rating+address confirmed;\nage≥18; family-member math checks"]
+    Nav --> Doc["Document Verification:\ncomments+rating required\n⚠ CRITICAL GAP: per-section 'Verified'\ncheck is commented out — dead code.\npVerificationstatus hardcoded to 'Good' always"]
+    Tele --> Save["POST SaveVerificationDetails /\nSavefieldverification / SaveFIVerificationDetails"]
+    Field --> Save
+    Doc --> Save
+    Save --> Guard{"Current loanstatus\n= 'Loan Approved'?"}
+    Guard -->|Yes| Advance["Advance loanstatus to\n7 / 8 / 9 respectively"]
+    Guard -->|No| DateOnly["Update date column ONLY\n(status non-regression guard)"]
+    Nav -.->|"⚠ GAP: direct URL navigation\nbypasses this entire sequencing check"| Doc
+```
+
+---
+
+## 5. STAGE 4 — DISBURSEMENT, DETAILED FLOW
+
+```mermaid
+flowchart TD
+    Q["DisbursementView queue"] --> Perm{"pIscreatepermission check"}
+    Perm -->|"⚠ CRITICAL GAP: commented out\non BOTH New and View screens —\nthe ONLY stage in the lifecycle\nwhere this check is disabled"| Screen
+    Screen["DisbursementNew"] --> Load["GetApprovedApplicationsByID\nloads approved terms"]
+    Load --> Mode{"pdisbursedtype?"}
+    Mode -->|Single Payment / NO EMI| Single["Full amount, or NO-EMI mode"]
+    Mode -->|Multiple Disbursement| Multi["Tranche within remaining amount"]
+    Mode -->|Stage Payment| Stage["Sequential stage selection"]
+    Single --> Calc["Auto-calc: approved amount\nminus unpaid charge balances"]
+    Multi --> Calc
+    Stage --> Calc
+    Calc --> Save["POST SaveLoanDisbursement"]
+    Save --> Flip{"MULTIPLE DISBURSEMENT (fully disbursed)\nor NO EMI mode?"}
+    Flip -->|Yes| Disbursed["loanstatus='Disbursed', loanstatusid=13"]
+    Flip -->|No, partial stage tranche| Gap["⚠ GAP: status remains UNCHANGED —\nno SQL transitions it for a partial\nstage disbursement"]
+```
+
+---
+
+## 6. STAGE 5 — REPAYMENT / COLLECTION, DETAILED FLOW
+
+```mermaid
+flowchart TD
+    Entry["LoanreceiptNew / Partpayment /\nChargesReceipt — permission check ACTIVE\non all 4 collection screens"] --> Mode{"Receipt type?"}
+    Mode -->|Regular EMI| EMI["SaveEmiReceipt / SaveLoanReceipt /\nSavePreLoanChargesReceipt"]
+    Mode -->|Part-Payment| PP["SavePartPaymentReceipt —\nmoratorium check ENFORCED here"]
+    Mode -->|Charges only| CR["SaveChargesReceipt —\nauto-computes charge + GST total"]
+    EMI --> Validate["Journal posts inline for\nCASH/BANK-ONLINE/ADJUSTMENT modes only;\nCheque-mode deferred until clearance"]
+    PP --> Validate
+    Validate --> Closed{"⚠ GAP: pLoanstatus is display-only —\nno block on collecting against an\nalready-closed loan"}
+    NACH["NACH Repayment Setup\n(separate module)"] --> NACHSave["POST SaveLoanRepayment\n❓ underlying status/table not traced"]
+```
+
+---
+
+## 7. STAGE 6 — PRE-CLOSURE, RESTRUCTURING & NPA, DETAILED FLOW
+
+```mermaid
+flowchart TD
+    PreClose["LoanpreclosureNew\npermission check ACTIVE"] --> Calc["Grand total = principal+interest\n+penalty+charges−waiver"]
+    Calc --> Save1["POST SaveLoanReceipt\n(pFormname='PRECLOSURE')"]
+    Save1 --> Gap1["❓ UNKNOWN: status write to\n'Pre Closed'/'EMI Closed' not visible\nin C# — presumed inside a Postgres function"]
+
+    Moratorium["MoratoriumComponent"] --> MaxDate["End date capped at original\ntenure end (cannot back-date)"]
+    MaxDate --> SaveM["POST SaveMoratorium"]
+    SaveM --> CFS["Updates tabapplication.creditfacilitystatus\n— a DIFFERENT field from loanstatus"]
+
+    Recall["LoanRecallComponent"] --> Notice{"Legal notice document\n(pLNoticePath) attached?"}
+    Notice -->|No| BlockRecall(["Should be blocked — mandatory field"])
+    Notice -->|Yes| SaveR["POST SaveLoanRecall"]
+    SaveR --> Gap2["❓ UNKNOWN: exact loanstatus\ntransition string not located"]
+
+    NPAProc["NpaProcessComponent"] --> DateLock["Process date LOCKED to today only"]
+    DateLock --> Select{"≥1 loan selected?"}
+    Select -->|No| BlockNPA(["Blocked: Please Select Atleast One Npa"])
+    Select -->|Yes| SaveN["POST SaveNPADetails"]
+    SaveN --> Gap3["❓ UNKNOWN: DPD threshold\n(90/180/365 days) not found in .NET DAL —\nlikely a Postgres function"]
+
+    FullFinal["FullAndFinalComponent"] --> InterBranch["Routes through\nInterbranchService.saveLoanReceipt()\n— always inter-branch-aware"]
+
+    style Gap1 fill:#fdeceb,stroke:#b3261e,color:#b3261e
+    style Gap2 fill:#fdeceb,stroke:#b3261e,color:#b3261e
+    style Gap3 fill:#fdeceb,stroke:#b3261e,color:#b3261e
+```
+
+---
+
+## 8. STATUS LIFECYCLE STATE MACHINE
+
+The single source of truth for every numeric status is cross-referenced from `Status.cs` via module documentation. This diagram shows every state and marks which transitions have a **confirmed write site** vs. which remain unconfirmed.
+
+```mermaid
+stateDiagram-v2
+    [*] --> FI_Saved: SaveNewLoanDetails (CREATE)
+    FI_Saved: 5 · FI Saved
+    FI_Saved --> Loan_Approved: Saveapprovedapplications (Approve)
+    Loan_Approved: 10 · Loan Approved
+    FI_Saved --> Loan_Rejected: Saveapprovedapplications (Reject)
+    Loan_Rejected: 12 · Loan Rejected [TERMINAL]
+    Loan_Approved --> Tele_Verification: SaveVerificationDetails
+    Tele_Verification: 7 · Tele Verification
+    Loan_Approved --> Field_Verification: Savefieldverification
+    Field_Verification: 8 · Field Verification
+    Loan_Approved --> Document_Verification: SaveFIVerificationDetails
+    Document_Verification: 9 · Document Verification
+    Loan_Approved --> Loan_Accepted: ⚠ DEAD CODE — hardcoded,\nnever actually reached
+    Loan_Accepted: 11 · Loan Accepted [UNREACHABLE]
+    Tele_Verification --> Disbursed: SaveLoanDisbursement
+    Field_Verification --> Disbursed: SaveLoanDisbursement
+    Document_Verification --> Disbursed: SaveLoanDisbursement
+    Disbursed: 13 · Disbursed
+    Disbursed --> Pre_Closed: ❓ status write not visible in C#\n(presumed Postgres function)
+    Pre_Closed: 15 · Pre Closed [WRITE SITE UNCONFIRMED]
+    Disbursed --> EMI_Closed: ❓ NO CONFIRMED CODE PATH
+    EMI_Closed: 14 · EMI Closed [NO WRITE SITE FOUND]
+    Disbursed --> Full_and_Final: ❓ NO CONFIRMED CODE PATH
+    Full_and_Final: 16 · Full and Final Settlement [NO WRITE SITE FOUND]
+    Disbursed --> Cancelled: ❓ NO CONFIRMED CODE PATH
+    Cancelled: 17 · Cancelled [NO WRITE SITE FOUND]
+
+    note right of EMI_Closed
+        These statuses are referenced in the module's
+        status enum but no application-code write site
+        was located in this investigation. The status
+        write is presumed to happen inside a Postgres
+        function outside both repos reviewed — this is
+        the deepest open question across the whole audit.
+    end note
+```
+
+---
+
+## 9. CROSS-MODULE OVERLAY
+
+```mermaid
+flowchart LR
+    subgraph Lifecycle["Personal Loan Lifecycle (§1-7 above)"]
+        C[Creation] --> Ap[Approval] --> V[Verification] --> D[Disbursement] --> Col[Collection] --> PC[Pre-Closure/NPA]
+    end
+    D -->|posts JV, CASH/BANK-ONLINE/ADJUSTMENT modes| Acc["Accounting/Ledger\n(FN_EMI_CREDITJV)"]
+    Col -->|posts JV| Acc
+    PC -->|NPA classification| NPAMod["NPA Module\n(day-count threshold not traced)"]
+    Lifecycle -.reads.-> Sch["Scheme Master\n(authoritative source of\namount/tenure limits used at Creation)"]
+    Lifecycle -.reads.-> KFS["Key Fact Statement\n⚠ GAP: no APR/Total-Cost-of-Credit\naggregate field — compliance question"]
+    Lifecycle -.reads.-> Bench["Interest Benchmark Master\n(feeds KFS floating-rate fields)"]
+    C -.governed by.-> SecVis["Section Visibility Master\n❓ UNKNOWN: consuming code that would\nread this back into Creation not located"]
+
+    style KFS fill:#fff3dc,stroke:#a5670b,color:#a5670b
+    style SecVis fill:#fff3dc,stroke:#a5670b,color:#a5670b
+```
+
+---
+
+## 10. LEGEND OF MARKED FINDINGS IN THESE DIAGRAMS
+
+| Marker | Meaning | Where documented in detail |
+|---|---|---|
+| ⚠ GAP | Confirmed: the system does not enforce something it functionally should | Companion functional-docs, Role-Based Access Control / Business Rules sections |
+| ⚠ CRITICAL GAP | Same as above, but assessed as highest-severity (money movement, maker/checker bypass, or dead-code security check) | `Personal-Loan-All-Forms-Functional-Documentation.md` §9 (Cross-Cutting Findings CC-1 to CC-10) |
+| ⚠ DEAD CODE | Implementation defect — a branch/feature that cannot execute or isn't wired up | Approval section §3, Role-Wise Approval Matrix findings |
+| ❓ UNKNOWN / NO CONFIRMED CODE PATH | Genuinely unresolved even after the research passes completed so far | `Personal-Loan-Process-Flow.md` §2 (stage-by-stage "Evidence" column) |
+
+---
+
+## 11. RELATED DOCUMENTS
+
+| Document | What it adds beyond this flow diagram |
+|---|---|
+| `Loan-Creation-Functional-Documentation.md` | Full field-level detail, business rules, API/DB traceability for Creation |
+| `Personal-Loan-All-Forms-Functional-Documentation.md` | Full field-level detail for all 24 lifecycle screens, plus the 10 cross-cutting findings (CC-1 to CC-10) |
+| `Personal Loan Lifecycle - Complete Functional Documentation.html` | The combined narrative documentation across all stages |
+| `Personal-Loan-Process-Flow.md` | The text/table form of this same flow, with per-stage evidence tags |
+| `Personal Loan Lifecycle - Functional Test Scenarios.md` / QMetry exports | 55–496 executable test cases derived from this same evidence |
+| `Personal Loan Lifecycle - QMetry Test Cases.html` | The interactive, collapsible test-case export covering all field-level cases |
+
+This flow document does not introduce any new claim — every box, arrow, and marker above traces back to a citation already established in one of the documents listed above.
+</script>
+
+<script>
+  mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose', flowchart: { useMaxWidth: true }, sequence: { useMaxWidth: true } });
+
+  const raw = document.getElementById('md-source').textContent;
+  marked.setOptions({ gfm: true, breaks: false });
+  const html = marked.parse(raw);
+  const contentDiv = document.getElementById('content');
+  contentDiv.innerHTML = html;
+
+  const mermaidBlocks = contentDiv.querySelectorAll('pre > code.language-mermaid');
+  let mIdx = 0;
+  mermaidBlocks.forEach(codeEl => {
+    mIdx++;
+    const graphDef = codeEl.textContent;
+    const wrap = document.createElement('div');
+    wrap.className = 'mermaid-wrap';
+    const graphDiv = document.createElement('div');
+    graphDiv.className = 'mermaid';
+    graphDiv.id = 'mermaid-graph-' + mIdx;
+    graphDiv.textContent = graphDef;
+    wrap.appendChild(graphDiv);
+    codeEl.parentElement.replaceWith(wrap);
+  });
+
+  mermaid.run({ querySelector: '.mermaid' }).catch(err => console.error('Mermaid render error:', err));
+
+  const headers = contentDiv.querySelectorAll('h1, h2');
+  const tocList = document.getElementById('toc-list');
+  let tocHtml = '';
+  let counter = 0;
+  headers.forEach(h => {
+    counter++;
+    const id = 'sec-' + counter;
+    h.id = id;
+    const text = h.textContent;
+    const level = h.tagName.toLowerCase();
+    tocHtml += `<a class="${level}" href="#${id}" data-text="${text.toLowerCase()}" data-id="${id}">${text}</a>`;
+  });
+  tocList.innerHTML = tocHtml;
+  const tocLinks = Array.from(document.querySelectorAll('#toc-list a'));
+
+  document.getElementById('search').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    tocLinks.forEach(a => { a.style.display = a.getAttribute('data-text').includes(q) ? '' : 'none'; });
+  });
+
+  const headerEls = Array.from(headers);
+  function onScroll(){
+    let current = null;
+    const scrollPos = window.scrollY + 120;
+    for (const h of headerEls) { if (h.offsetTop <= scrollPos) current = h; else break; }
+    tocLinks.forEach(a => a.classList.remove('active'));
+    if (current) {
+      const link = tocLinks.find(a => a.getAttribute('data-id') === current.id);
+      if (link) { link.classList.add('active'); link.scrollIntoView({ block: 'nearest' }); }
+    }
+    const doc = document.documentElement;
+    const scrollable = doc.scrollHeight - doc.clientHeight;
+    document.getElementById('progressbar').style.width = (scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0) + '%';
+    document.getElementById('backtotop').style.display = window.scrollY > 600 ? 'block' : 'none';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  document.getElementById('backtotop').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+</body>
+</html>
